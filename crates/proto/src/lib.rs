@@ -5,3 +5,5 @@
 #![allow(clippy::pedantic, clippy::missing_docs_in_private_items, missing_docs)]
 
 tonic::include_proto!("routed.snapshot.v1");
+
+pub mod tls;

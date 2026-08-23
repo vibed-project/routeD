@@ -48,8 +48,18 @@ async fn serve(args: cli::ServeArgs) -> anyhow::Result<()> {
     }
     let mut classifier_timeout = Duration::from_millis(25);
     if let Some(addr) = args.snapshot_addr.clone() {
+        let tls = match &args.snapshot_tls_dir {
+            Some(dir) => {
+                tracing::info!(dir = %dir.display(), "snapshot gRPC uses mutual TLS");
+                Some(routed_proto::tls::client_mtls(
+                    dir,
+                    args.snapshot_tls_domain.as_deref(),
+                )?)
+            }
+            None => None,
+        };
         tracing::info!(addr = %addr, "snapshot source: operator gRPC");
-        let source = snapshot_source::GrpcSource::new(addr);
+        let source = snapshot_source::GrpcSource::new(addr, tls);
         tokio::spawn(source.watch(Arc::clone(&holder)));
         // Wait briefly for the first snapshot so the classifier is built from
         // the distributed RouterProfile instead of defaults. /readyz stays 503

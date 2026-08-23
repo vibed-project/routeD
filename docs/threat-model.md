@@ -77,9 +77,9 @@ plaintext in v0.1.0 - see Gaps.
 
 Residual / gaps: anyone with CRD write access controls routing; that is the
 intended administrative boundary - protect it with Kubernetes RBAC. The
-snapshot gRPC stream is unauthenticated inside the cluster; a NetworkPolicy
-restricting the operator's 9090 to router pods is recommended until mTLS
-lands.
+snapshot gRPC stream serves plain TCP by default; enable mutual TLS with
+`--snapshot-tls-dir` on both sides (ADR-0021), or restrict the operator's
+9090 to router pods with a NetworkPolicy.
 
 ### 4. Model artifacts (supply chain)
 
@@ -134,8 +134,6 @@ for volumetric attacks.
 
 ## Known gaps (tracked, post-v0.1.0)
 
-- mTLS / authn for the operator snapshot gRPC stream (NetworkPolicy
-  recommended meanwhile).
 - Cosign signature verification for model artifacts (digest pinning today;
   ADR-0019 anticipates signatures).
 - Webhook `failurePolicy: Fail` guidance for installations that want hard
