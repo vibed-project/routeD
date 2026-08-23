@@ -1,12 +1,33 @@
 # Changelog
 
 All notable changes to this project are documented here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/); routeD is pre-1.0 and no
-version has been tagged yet.
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/); routeD is pre-1.0, so
+minor versions may still break APIs.
 
 ## [Unreleased]
 
 Nothing yet.
+
+## [0.1.1] - 2026-08-23
+
+### Added
+
+- Pluggable authentication seam for the decision APIs (ADR-0020): an
+  `Authenticator` trait in `routed-ingress-inline` with an allow-all
+  default, composed via `AppState::with_authenticator`. `/v1/decide` and
+  `/v1/feedback` enforce it before any body read; denials use the standard
+  OpenAI error envelope (401/403). Default behaviour is unchanged.
+- Chart: `extraContainers` and `extraVolumes` passthrough on the router
+  Deployment, for sidecars that share the pod (for example log shippers
+  reading the feedback journal).
+
+### Changed
+
+- Release pipeline: build-record artifact upload disabled and the publish
+  job's artifact download scoped to what it publishes, fixing the
+  transient publish failures seen during v0.1.0.
+- Dependency bumps (tokenizers 0.23, actions/checkout v7,
+  softprops/action-gh-release v3, upload/download-artifact v7).
 
 ## [0.1.0] - 2026-08-23
 
