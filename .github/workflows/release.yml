@@ -93,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: azure/setup-helm@v4
+      - uses: azure/setup-helm@v5
       - name: Package and push chart (OCI)
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} \
