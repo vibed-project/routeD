@@ -11,6 +11,10 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    ignore:
+      # The toolchain version in this action must match rust-toolchain.toml
+      # (scripts/check-hygiene.sh); bumps are coordinated changes.
+      - dependency-name: "dtolnay/rust-toolchain" 
   - package-ecosystem: docker
     directory: "/build"
     schedule:
