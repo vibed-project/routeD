@@ -83,7 +83,7 @@ jobs:
         run: cargo install --locked cargo-cyclonedx --version 0.5.7
       - name: Generate SBOMs
         run: make sbom CARGO=cargo
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: sbom
           path: sbom/
@@ -101,7 +101,7 @@ jobs:
           helm package charts/routed --version "${GITHUB_REF_NAME#v}" \
             --app-version "${GITHUB_REF_NAME#v}"
           helm push routed-"${GITHUB_REF_NAME#v}".tgz "oci://${IMAGE_BASE}/charts"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: chart
           path: routed-*.tgz
