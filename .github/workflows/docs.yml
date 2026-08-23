@@ -1,0 +1,71 @@
+name: Docs
+
+# Builds the Docusaurus site on every change to it, and publishes to GitHub
+# Pages from main. Building on pull requests means a broken docs build fails
+# the PR rather than the deploy.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "website/**"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    paths:
+      - "website/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # One deploy at a time. Do not cancel an in-flight deploy: a half-published
+  # site is worse than a slightly stale one.
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: install
+        working-directory: website
+        run: npm ci
+
+      - name: typecheck
+        working-directory: website
+        run: npm run typecheck
+
+      - name: build
+        working-directory: website
+        # Docusaurus exits non-zero on a broken internal link only when
+        # onBrokenLinks is 'throw'; see docusaurus.config.ts.
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: website/build
+
+  deploy:
+    name: deploy to Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

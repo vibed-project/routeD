@@ -8,6 +8,8 @@ the *hands* that enforces the decision and calls the provider.
 Agent / User  ->  routeD (decide)  ->  Gateway (enforce, call provider)  ->  Model
 ```
 
+**Documentation: https://vibed-project.github.io/routeD/**
+
 routeD optimises primarily for **cost** and **security / data sovereignty**,
 secondarily for quality and latency, and explains every decision in a
 machine-readable, auditable form.

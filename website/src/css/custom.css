@@ -1,0 +1,25 @@
+/**
+ * Theme overrides for routeD.
+ */
+:root {
+  --ifm-color-primary: #1f9d76;
+  --ifm-color-primary-dark: #1c8d6a;
+  --ifm-color-primary-darker: #1a8564;
+  --ifm-color-primary-darkest: #156e52;
+  --ifm-color-primary-light: #22ad82;
+  --ifm-color-primary-lighter: #24b588;
+  --ifm-color-primary-lightest: #3ad0a1;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #3ad0a1;
+  --ifm-color-primary-dark: #24b588;
+  --ifm-color-primary-darker: #22ad82;
+  --ifm-color-primary-darkest: #1c8d6a;
+  --ifm-color-primary-light: #5cd9b2;
+  --ifm-color-primary-lighter: #6ddebb;
+  --ifm-color-primary-lightest: #9debd2;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.1);
+}

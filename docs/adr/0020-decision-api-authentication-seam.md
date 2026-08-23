@@ -21,7 +21,7 @@ decision path must not pay for machinery it does not use.
 - `trait Authenticator`: `authenticate(&HeaderMap) -> AuthDecision`, where
   `AuthDecision` is `Allow(Identity)` or `Deny { status, reason }`
   (401/403). `Identity` carries a subject and group list.
-- The default is `AllowAll` (anonymous, always allowed) — existing
+- The default is `AllowAll` (anonymous, always allowed). Existing
   behaviour is unchanged and the default build has no new dependencies.
 - Deployments plug an implementation in via
   `AppState::with_authenticator`, the same composition pattern as
@@ -31,7 +31,7 @@ Enforcement points are `/v1/decide` and `/v1/feedback`, before any body
 read or classification work. The forwarding path (`/v1/chat/completions`
 et al.) is not gated here: end-user traffic authenticates at the gateway
 behind the router, which owns those credentials (ADR-0001). `/healthz`,
-`/readyz` and `/metrics` stay open — probes and scrapers carry no
+`/readyz` and `/metrics` stay open. Probes and scrapers carry no
 credentials.
 
 Rules for implementations, in line with the restriction-only philosophy
