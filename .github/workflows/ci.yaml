@@ -99,7 +99,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push routed
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: build/routed.Dockerfile
@@ -110,7 +110,7 @@ jobs:
           cache-from: type=gha,scope=routed-${{ matrix.suffix }}
           cache-to: type=gha,mode=max,scope=routed-${{ matrix.suffix }}
       - name: Build and push routed-operator
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: build/routed-operator.Dockerfile
