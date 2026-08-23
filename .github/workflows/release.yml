@@ -26,6 +26,9 @@ jobs:
         with:
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-deny@0.20.2
       - name: Full CI gate
         run: make ci CARGO=cargo
       - name: Tag matches the workspace version
