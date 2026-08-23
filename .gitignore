@@ -16,3 +16,8 @@ __pycache__/
 *.swp
 .DS_Store
 sbom/
+
+# Docusaurus docs site (website/)
+node_modules/
+website/build/
+website/.docusaurus/

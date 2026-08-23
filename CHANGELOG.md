@@ -8,6 +8,22 @@ minor versions may still break APIs.
 
 Nothing yet.
 
+## [0.1.3] - 2026-08-23
+
+### Added
+
+- Cosign signature verification for `oci://` model artifacts (ADR-0022):
+  `ROUTED_ARTIFACT_COSIGN_PUB` (an ECDSA P-256 `cosign.pub`) makes a valid
+  cosign signature naming the pinned manifest digest mandatory for every
+  `oci://` artifact, checked before any bytes are fetched. Fail closed:
+  an unusable key or missing signature is an error, never a fallback to
+  pin-only trust. `https://` and `file://` artifacts keep pin-only trust.
+- Documentation site published to GitHub Pages.
+
+### Changed
+
+- Dependency bump (docker/setup-qemu-action v4).
+
 ## [0.1.2] - 2026-08-23
 
 ### Added
