@@ -122,7 +122,7 @@ jobs:
           v="${GITHUB_REF_NAME#v}"
           awk "/^## \\[$v\\]/{f=1;next} /^## \\[/{f=0} f" CHANGELOG.md > dist/NOTES.md
           test -s dist/NOTES.md || echo "See CHANGELOG.md." > dist/NOTES.md
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           body_path: dist/NOTES.md
           files: |
