@@ -56,6 +56,10 @@ jobs:
       - name: Build and push
         id: push
         uses: docker/build-push-action@v7
+        env:
+          # Build-record artifacts have corrupted downstream download-artifact
+          # steps before; publish only needs the sbom and chart artifacts.
+          DOCKER_BUILD_RECORD_UPLOAD: "false"
         with:
           context: .
           file: build/${{ matrix.component }}.Dockerfile
@@ -113,6 +117,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v7
         with:
+          pattern: "{sbom,chart}"
           path: dist
           merge-multiple: true
       - name: Checksums
