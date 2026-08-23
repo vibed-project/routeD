@@ -89,7 +89,10 @@ routing; registry compromise; cache poisoning.
 Mitigations: every remote artifact is digest-pinned and verified before
 use, cache hits re-verify, mismatches never enter the cache (ADR-0016).
 `oci://` pulls verify the manifest against the pinned digest and the layer
-against the manifest (ADR-0019). A configured model that fails to load
+against the manifest (ADR-0019), and with `ROUTED_ARTIFACT_COSIGN_PUB`
+set, every `oci://` artifact must additionally carry a valid cosign
+signature by the configured key, checked before any bytes are fetched
+(ADR-0022; fail closed). A configured model that fails to load
 stops startup rather than degrading silently. Structurally, models can
 only tighten decisions: classifier risk is floored by the heuristics, and
 learned-router predictions only refine `predictedQuality` inside the
@@ -134,8 +137,6 @@ for volumetric attacks.
 
 ## Known gaps (tracked, post-v0.1.0)
 
-- Cosign signature verification for model artifacts (digest pinning today;
-  ADR-0019 anticipates signatures).
 - Webhook `failurePolicy: Fail` guidance for installations that want hard
   admission gating (default stays Ignore, ADR-0015).
 - Credentialed (private) OCI registries for model artifacts.

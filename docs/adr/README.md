@@ -40,3 +40,4 @@ implementation details do not get an ADR.
 | [0019](0019-supply-chain-and-release.md) | Supply chain and release engineering | Accepted |
 | [0020](0020-decision-api-authentication-seam.md) | Decision API authentication seam | Accepted |
 | [0021](0021-snapshot-distribution-mtls.md) | Mutual TLS for snapshot distribution | Accepted |
+| [0022](0022-cosign-artifact-verification.md) | Cosign signature verification for model artifacts | Accepted |

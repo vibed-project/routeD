@@ -69,6 +69,9 @@ tonic-prost-build = "0.14"
 protox = "0.9"
 # --- Phase 5: Envoy ext_proc (pre-generated tonic bindings for the envoy protos) ---
 envoy-types = "0.7"
+# --- cosign artifact signature verification (ADR-0022) ---
+p256 = { version = "0.13", default-features = false, features = ["ecdsa", "pem", "std"] }
+base64ct = { version = "1", features = ["alloc"] }
 # --- Phase 4: ONNX inference (behind the `onnx` feature, ADR-0002/0016) ---
 # load-dynamic (ADR-0002 fallback 1): the pyke static binaries need a newer
 # libstdc++ than the pinned bookworm toolchain ships; the Microsoft shared
