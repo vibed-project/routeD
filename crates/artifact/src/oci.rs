@@ -164,6 +164,7 @@ pub(crate) fn fetch_verified(
     manifest_digest_hex: &str,
     dest: &Path,
     cache_dir: &Path,
+    cosign: Option<&crate::cosign::CosignVerifier>,
 ) -> Result<(), FetchError> {
     let fetch_err = |reason: String| FetchError::Fetch {
         uri: uri.to_owned(),
@@ -185,6 +186,48 @@ pub(crate) fn fetch_verified(
             expected: manifest_digest_hex.to_owned(),
             actual,
         });
+    }
+
+    // 1b. When a cosign trust root is configured, the pinned manifest must
+    // carry a valid signature before any artifact bytes are fetched
+    // (ADR-0022). The signature manifest is fetched by its well-known tag;
+    // its integrity comes from the signatures themselves, not the tag.
+    if let Some(verifier) = cosign {
+        let sig_tag = crate::cosign::CosignVerifier::sig_tag(manifest_digest_hex);
+        let sig_url = format!("{}/v2/{}/manifests/{sig_tag}", r.base, r.repository);
+        let sig_manifest_bytes = get(uri, &sig_url, MANIFEST_ACCEPT, &mut token).map_err(|e| {
+            FetchError::SignatureVerification {
+                uri: uri.to_owned(),
+                reason: format!("signature manifest {sig_tag} not fetchable: {e}"),
+            }
+        })?;
+        let sig_manifest: serde_json::Value =
+            serde_json::from_slice(&sig_manifest_bytes).map_err(|e| {
+                FetchError::SignatureVerification {
+                    uri: uri.to_owned(),
+                    reason: format!("signature manifest is not JSON: {e}"),
+                }
+            })?;
+        let base = r.base.clone();
+        let repository = r.repository.clone();
+        let mut fetch_blob = |digest: &str| -> Result<Vec<u8>, FetchError> {
+            let hex_digest = digest.strip_prefix("sha256:").ok_or_else(|| {
+                fetch_err(format!("signature payload digest {digest:?} is not sha256"))
+            })?;
+            let blob_url = format!("{base}/v2/{repository}/blobs/{digest}");
+            let blob = get(uri, &blob_url, "application/octet-stream", &mut token)?;
+            let actual = hex::encode(Sha256::digest(&blob));
+            if actual != hex_digest {
+                return Err(FetchError::DigestMismatch {
+                    uri: uri.to_owned(),
+                    expected: hex_digest.to_owned(),
+                    actual,
+                });
+            }
+            Ok(blob)
+        };
+        verifier.verify(uri, manifest_digest_hex, &sig_manifest, &mut fetch_blob)?;
+        tracing::info!(uri, "cosign signature verified");
     }
 
     // 2. The single layer the trusted manifest names.

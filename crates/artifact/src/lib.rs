@@ -8,6 +8,7 @@
 //! `@sha256:<hex>` suffix, cache hits are re-verified before reuse, and
 //! downloads only enter the cache after their digest checks out.
 
+pub mod cosign;
 mod oci;
 
 use std::io::Read as _;
@@ -42,6 +43,14 @@ pub enum FetchError {
         /// The artifact URI.
         uri: String,
         /// Underlying error.
+        reason: String,
+    },
+    /// A configured cosign key did not verify the artifact's signature.
+    #[error("cosign verification failed for {uri:?}: {reason}")]
+    SignatureVerification {
+        /// The artifact URI.
+        uri: String,
+        /// Why verification failed.
         reason: String,
     },
     /// Filesystem failure (cache or `file://` source).
@@ -128,13 +137,27 @@ pub fn parse(uri: &str) -> Result<ArtifactRef, FetchError> {
 /// Content-addressed artifact cache.
 pub struct Resolver {
     cache_dir: PathBuf,
+    cosign: Option<cosign::CosignVerifier>,
 }
 
 impl Resolver {
     /// Resolver over an explicit cache directory.
     #[must_use]
     pub fn new(cache_dir: PathBuf) -> Self {
-        Self { cache_dir }
+        Self {
+            cache_dir,
+            cosign: None,
+        }
+    }
+
+    /// Require cosign signatures on `oci://` artifacts, verified against
+    /// this public key (PEM, ECDSA P-256; ADR-0022).
+    ///
+    /// # Errors
+    /// When the PEM is not a valid P-256 public key.
+    pub fn with_cosign_pub_pem(mut self, pem: &str) -> Result<Self, FetchError> {
+        self.cosign = Some(cosign::CosignVerifier::from_pem(pem)?);
+        Ok(self)
     }
 
     /// Resolver over `$ROUTED_MODEL_CACHE`, `~/.cache/routed/models`, or
@@ -150,7 +173,23 @@ impl Resolver {
             },
             PathBuf::from,
         );
-        Self::new(dir)
+        let mut resolver = Self::new(dir);
+        if let Some(key_path) = std::env::var_os("ROUTED_ARTIFACT_COSIGN_PUB") {
+            // Fail closed: a configured-but-broken trust root must not
+            // silently disable verification.
+            let pem = std::fs::read_to_string(&key_path).unwrap_or_default();
+            match cosign::CosignVerifier::from_pem(&pem) {
+                Ok(verifier) => {
+                    tracing::info!(key = %PathBuf::from(&key_path).display(), "cosign verification required for oci:// artifacts");
+                    resolver.cosign = Some(verifier);
+                }
+                Err(e) => {
+                    tracing::error!(error = %e, key = %PathBuf::from(&key_path).display(), "ROUTED_ARTIFACT_COSIGN_PUB is unusable; oci:// artifacts will fail");
+                    resolver.cosign = Some(cosign::CosignVerifier::poisoned());
+                }
+            }
+        }
+        resolver
     }
 
     /// The cache directory.
@@ -205,7 +244,14 @@ impl Resolver {
                     tracing::warn!(uri, "cached artifact failed re-verification; refetching");
                 }
                 if r.scheme == Scheme::Oci {
-                    oci::fetch_verified(uri, &r.location, expected, &cached, &self.cache_dir)?;
+                    oci::fetch_verified(
+                        uri,
+                        &r.location,
+                        expected,
+                        &cached,
+                        &self.cache_dir,
+                        self.cosign.as_ref(),
+                    )?;
                 } else {
                     self.fetch_verified(uri, &r.location, expected, &cached)?;
                 }
