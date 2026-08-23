@@ -11,6 +11,6 @@
   },
   "candidates": [],
   "latencyMs": 0,
-  "snapshotHash": "sha256:4428a62d82b151411a793a55bb874be5c3e79758635418ee37a18be7f4c6877d",
+  "snapshotHash": "sha256:50b4f3d79c33cde9e6affa84d8a931b563d248813d5ccd55b490c52fa1c00704",
   "reason": "requested model \"gpt-4o\" is not a routed alias of ai-platform/default-cost-secure"
 }
