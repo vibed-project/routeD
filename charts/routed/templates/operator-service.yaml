@@ -1,0 +1,32 @@
+{{- if .Values.operator.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "routed.operator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "routed.operator.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "routed.operator.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: grpc
+      port: {{ .Values.operator.snapshotGrpcPort }}
+      targetPort: grpc
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.operator.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+    - name: health
+      port: {{ .Values.operator.healthPort }}
+      targetPort: health
+      protocol: TCP
+    {{- if .Values.operator.webhook.enabled }}
+    - name: webhook
+      port: 443
+      targetPort: webhook
+      protocol: TCP
+    {{- end }}
+{{- end }}

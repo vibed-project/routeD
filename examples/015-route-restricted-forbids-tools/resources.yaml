@@ -1,0 +1,142 @@
+apiVersion: routed.io/v1alpha1
+kind: DataClass
+metadata: { name: public, namespace: ai-platform }
+spec: { rank: 0, description: "Public information", detection: { headerValues: [public] } }
+---
+apiVersion: routed.io/v1alpha1
+kind: DataClass
+metadata: { name: internal, namespace: ai-platform }
+spec: { rank: 1, description: "Internal business data", detection: { headerValues: [internal] } }
+---
+apiVersion: routed.io/v1alpha1
+kind: DataClass
+metadata: { name: personal, namespace: ai-platform }
+spec:
+  rank: 3
+  description: "Contains personal data under GDPR"
+  detection: { headerValues: [personal, pii], piiEntities: [PERSON, EMAIL, PHONE, IBAN, NATIONAL_ID, HEALTH], minConfidence: 0.7 }
+  constraints: { requireJurisdiction: [EU], forbidCloudActExposed: true, requireOperatorControl: [eu-entity, on-prem], maxRetentionDays: 0 }
+---
+apiVersion: routed.io/v1alpha1
+kind: DataClass
+metadata: { name: restricted, namespace: ai-platform }
+spec:
+  rank: 5
+  description: "Restricted: no tool use, EU only"
+  detection: { headerValues: [restricted] }
+  constraints: { requireJurisdiction: [EU], forbidCapabilities: [tools] }
+---
+apiVersion: routed.io/v1alpha1
+kind: ModelTier
+metadata: { name: eu-sovereign-large, namespace: ai-platform }
+spec:
+  gatewayModel: mistral-large-eu
+  provider: stackit
+  capabilities: [chat, tools, json, vision]
+  contextWindow: 128000
+  cost: { inputPerMillion: 2.0, outputPerMillion: 6.0, currency: EUR }
+  quality: { baseline: 0.82, byTask: { code: 0.85, summarization: 0.88 } }
+  latency: { p50Ms: 900, p95Ms: 2500 }
+  sovereignty: { jurisdiction: EU, dataResidency: eu-de, operatorControl: eu-entity, cloudActExposed: false, allowedDataClasses: [public, internal, personal, restricted] }
+  security: { maxRiskScore: 0.9, toolCallingAllowed: true }
+---
+apiVersion: routed.io/v1alpha1
+kind: ModelTier
+metadata: { name: eu-sovereign-small, namespace: ai-platform }
+spec:
+  gatewayModel: mistral-small-eu
+  provider: stackit
+  capabilities: [chat, json]
+  contextWindow: 32000
+  cost: { inputPerMillion: 0.2, outputPerMillion: 0.6, currency: EUR }
+  quality: { baseline: 0.7, byTask: { summarization: 0.78 } }
+  latency: { p50Ms: 300, p95Ms: 900 }
+  sovereignty: { jurisdiction: EU, dataResidency: eu-de, operatorControl: eu-entity, cloudActExposed: false, allowedDataClasses: [public, internal, personal, restricted] }
+---
+apiVersion: routed.io/v1alpha1
+kind: ModelTier
+metadata: { name: us-cheap-small, namespace: ai-platform }
+spec:
+  gatewayModel: gpt-mini
+  provider: openai
+  capabilities: [chat, tools, json]
+  contextWindow: 128000
+  cost: { inputPerMillion: 0.15, outputPerMillion: 0.6, currency: USD }
+  quality: { baseline: 0.75 }
+  latency: { p50Ms: 400, p95Ms: 1200 }
+  sovereignty: { jurisdiction: US, dataResidency: us-east, operatorControl: us-entity, cloudActExposed: true, allowedDataClasses: [public] }
+  security: { maxRiskScore: 0.5, toolCallingAllowed: false }
+  labels: { cheap: "true" }
+---
+apiVersion: routed.io/v1alpha1
+kind: ModelTier
+metadata: { name: ch-onprem-mid, namespace: ai-platform }
+spec:
+  gatewayModel: swiss-mid
+  provider: onprem
+  capabilities: [chat, tools]
+  contextWindow: 128000
+  cost: { inputPerMillion: 3.0, outputPerMillion: 9.0, currency: EUR }
+  quality: { baseline: 0.8 }
+  latency: { p50Ms: 600, p95Ms: 1500 }
+  sovereignty: { jurisdiction: OTHER, dataResidency: ch, operatorControl: on-prem, cloudActExposed: false, allowedDataClasses: [public, internal, personal] }
+---
+apiVersion: routed.io/v1alpha1
+kind: ModelTier
+metadata: { name: eu-region-us-vendor, namespace: ai-platform }
+spec:
+  gatewayModel: eu-hosted-us-vendor
+  capabilities: [chat, tools]
+  contextWindow: 128000
+  cost: { inputPerMillion: 3.0, outputPerMillion: 9.0, currency: EUR }
+  quality: { baseline: 0.8 }
+  latency: { p50Ms: 700, p95Ms: 1500 }
+  sovereignty: { jurisdiction: EU, dataResidency: eu-ie, operatorControl: us-entity, cloudActExposed: false, allowedDataClasses: [public, internal, personal] }
+---
+apiVersion: routed.io/v1alpha1
+kind: ModelTier
+metadata: { name: eu-hyperscaler, namespace: ai-platform }
+spec:
+  gatewayModel: eu-region-hyperscaler
+  capabilities: [chat, tools]
+  contextWindow: 128000
+  cost: { inputPerMillion: 3.0, outputPerMillion: 9.0, currency: EUR }
+  quality: { baseline: 0.8 }
+  latency: { p50Ms: 800, p95Ms: 1500 }
+  sovereignty: { jurisdiction: EU, dataResidency: eu-de, operatorControl: eu-entity, cloudActExposed: true, allowedDataClasses: [public, internal, personal] }
+---
+apiVersion: routed.io/v1alpha1
+kind: RouterProfile
+metadata: { name: default, namespace: ai-platform }
+spec:
+  classifier: { type: heuristic, timeoutMs: 25 }
+  costModel: { fxToEUR: { USD: 0.9 }, defaultOutputTokens: 256 }
+---
+apiVersion: routed.io/v1alpha1
+kind: RoutingPolicy
+metadata: { name: default-cost-secure, namespace: ai-platform }
+spec:
+  priority: 100
+  match: { tenants: ["*"], paths: ["/v1/chat/completions", "/v1/messages", "/v1/responses", "/v1/completions"], modelAliases: ["auto", "routed/*"] }
+  hardConstraints: { respectDataClass: true, maxCostPerRequestEUR: 0.05, denyIfRiskScoreAbove: 0.95 }
+  objective: { mode: cost-first-with-quality-floor, qualityFloor: 0.75 }
+  reasoningBudget: { enabled: true, map: { low: none, medium: low, high: high } }
+  fallbackDecision: { tier: eu-sovereign-large }
+  explain: true
+---
+apiVersion: routed.io/v1alpha1
+kind: RoutingPolicy
+metadata: { name: vision-only, namespace: ai-platform }
+spec:
+  priority: 200
+  match: { tenants: ["vision-team"], modelAliases: ["auto"] }
+  candidates: { exclude: [eu-sovereign-large] }
+  hardConstraints: { requireCapabilities: [vision] }
+---
+apiVersion: routed.io/v1alpha1
+kind: RoutingPolicy
+metadata: { name: strict-quality, namespace: ai-platform }
+spec:
+  priority: 300
+  match: { tenants: ["research"], modelAliases: ["auto"] }
+  objective: { mode: cost-first-with-quality-floor, qualityFloor: 0.99 }

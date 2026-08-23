@@ -1,0 +1,13 @@
+[package]
+name = "routed-version"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "Build metadata (version, commit) shared by all routeD binaries."
+build = "build.rs"
+
+[lints]
+workspace = true

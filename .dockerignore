@@ -1,0 +1,12 @@
+.git/
+.github/
+.cache/
+target/
+bin/
+docs/
+charts/
+trainer/
+examples/
+test/e2e/
+*.md
+!README.md

@@ -1,0 +1,19 @@
+[package]
+name = "routed-security"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "PII detection, injection/risk signals, data-class inference, and the restriction-only header hint model."
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+regex.workspace = true
+routed-snapshot.workspace = true
+routed-decision.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,32 @@
+apiVersion: routed.io/v1alpha1
+kind: ModelTier
+metadata:
+  name: eu-sovereign-large
+  namespace: ai-platform
+spec:
+  gatewayModel: "mistral-large-eu"
+  provider: "stackit"
+  capabilities: [chat, tools, json, vision]
+  contextWindow: 128000
+  cost:
+    inputPerMillion: 2.0
+    outputPerMillion: 6.0
+    currency: EUR
+  quality:
+    baseline: 0.82
+    byTask:
+      code: 0.85
+      summarization: 0.88
+  latency:
+    p50Ms: 900
+    p95Ms: 2500
+  sovereignty:
+    jurisdiction: EU
+    dataResidency: eu-de
+    operatorControl: eu-entity
+    cloudActExposed: false
+    allowedDataClasses: [public, internal, confidential, personal]
+  security:
+    maxRiskScore: 0.9
+    toolCallingAllowed: true
+  labels: {}

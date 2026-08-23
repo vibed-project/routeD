@@ -1,0 +1,27 @@
+[package]
+name = "routed-decision"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "Decision engine: candidate pruning by hard constraints, scoring, selection, and explanation."
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+strum.workspace = true
+routed-snapshot.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+criterion.workspace = true
+routed-policy.workspace = true
+
+[[bench]]
+name = "decide"
+harness = false
+
+[lints]
+workspace = true

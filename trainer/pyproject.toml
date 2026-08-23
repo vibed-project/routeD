@@ -1,0 +1,10 @@
+[project]
+name = "routed-train"
+version = "0.1.0.dev0"
+description = "Offline training and ONNX export for the routeD learned router"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+dependencies = ["numpy>=1.26", "onnx>=1.16"]
+
+[project.scripts]
+routed-train = "routed_trainer.train:main"

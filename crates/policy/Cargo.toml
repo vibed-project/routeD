@@ -1,0 +1,20 @@
+[package]
+name = "routed-policy"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "Policy compiler: validates and cross-references CRDs and produces a routed-snapshot Snapshot. Shared by the operator, the admission webhook, routedctl, and tests."
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml_ng.workspace = true
+thiserror.workspace = true
+routed-api.workspace = true
+routed-snapshot.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,143 @@
+{{- if not (has .Values.mode (list "inline" "extproc")) }}
+{{- fail (printf "mode must be inline or extproc, got %q" .Values.mode) }}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "routed.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "routed.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "routed.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "routed.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "routed.serviceAccountName" . }}
+      # Streams may run for a while; give graceful shutdown room (stream idle timeout is 60s).
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: routed
+          image: {{ include "routed.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - serve
+            - --mode
+            - {{ .Values.mode }}
+            - --http-addr
+            - 0.0.0.0:{{ .Values.service.port }}
+            {{- if eq .Values.mode "extproc" }}
+            - --extproc-addr
+            - 0.0.0.0:{{ .Values.service.extprocPort }}
+            {{- end }}
+            {{- if and .Values.operator.enabled (eq .Values.operator.distribution "grpc") }}
+            - --snapshot-addr
+            - {{ printf "http://%s.%s.svc:%d" (include "routed.operator.fullname" .) .Release.Namespace (int .Values.operator.snapshotGrpcPort) }}
+            {{- else if and .Values.operator.enabled (eq .Values.operator.distribution "configmap") }}
+            - --snapshot-path
+            - /etc/routed/snapshot/snapshot.json
+            {{- else if .Values.routing.enabled }}
+            - --resources
+            - /etc/routed/resources
+            {{- end }}
+          env:
+            {{- if .Values.upstream }}
+            - name: ROUTED_UPSTREAM
+              value: {{ .Values.upstream | quote }}
+            {{- end }}
+            {{- if .Values.feedback.enabled }}
+            - name: ROUTED_FEEDBACK_DIR
+              value: {{ .Values.feedback.dir | quote }}
+            {{- end }}
+            {{- if .Values.otlpEndpoint }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.otlpEndpoint | quote }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            {{- if eq .Values.mode "extproc" }}
+            - name: grpc
+              containerPort: {{ .Values.service.extprocPort }}
+              protocol: TCP
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 1
+            periodSeconds: 5
+          volumeMounts:
+            {{- if .Values.feedback.enabled }}
+            - name: feedback
+              mountPath: {{ .Values.feedback.dir }}
+            {{- end }}
+            {{- if and .Values.operator.enabled (eq .Values.operator.distribution "configmap") }}
+            - name: snapshot
+              mountPath: /etc/routed/snapshot
+              readOnly: true
+            {{- else if .Values.routing.enabled }}
+            - name: resources
+              mountPath: /etc/routed/resources
+              readOnly: true
+            {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        {{- if .Values.feedback.enabled }}
+        - name: feedback
+          emptyDir: {}
+        {{- end }}
+        {{- if and .Values.operator.enabled (eq .Values.operator.distribution "configmap") }}
+        - name: snapshot
+          configMap:
+            name: {{ .Values.operator.configmapName }}
+            # The operator creates it after the first successful compile.
+            optional: true
+        {{- else if .Values.routing.enabled }}
+        - name: resources
+          configMap:
+            name: {{ default (printf "%s-resources" (include "routed.fullname" .)) .Values.routing.existingConfigMap }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,33 @@
+{
+  "id": "01JGOLDEN0000000000000000",
+  "outcome": "ROUTE",
+  "policy": "ai-platform/budget-lane",
+  "requestedModel": "auto",
+  "selectedTier": "us-cheap-small",
+  "gatewayModel": "gpt-mini",
+  "parameters": {},
+  "classification": {
+    "task": "chat",
+    "complexity": "low",
+    "riskScore": 0.0
+  },
+  "candidates": [
+    {
+      "tier": "eu-sovereign-small",
+      "predictedQuality": 0.7,
+      "estimatedCostEUR": 0.000158,
+      "score": 0.1
+    },
+    {
+      "tier": "us-cheap-small",
+      "predictedQuality": 0.75,
+      "estimatedCostEUR": 0.000142,
+      "score": 0.9,
+      "selected": true
+    }
+  ],
+  "estimatedCostEUR": 0.000142,
+  "estimatedSavingsEUR": 0.000016,
+  "latencyMs": 0,
+  "snapshotHash": "sha256:d0159d3529747f0c5c4ca0836b7203e34c1be5c776cbfd64b3befb7f2b8dabac"
+}

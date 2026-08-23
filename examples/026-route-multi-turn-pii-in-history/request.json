@@ -1,0 +1,17 @@
+{
+  "model": "auto",
+  "messages": [
+    {
+      "role": "user",
+      "content": "My IBAN is DE89 3704 0044 0532 0130 00."
+    },
+    {
+      "role": "assistant",
+      "content": "Noted."
+    },
+    {
+      "role": "user",
+      "content": "Please continue."
+    }
+  ]
+}

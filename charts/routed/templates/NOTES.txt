@@ -1,0 +1,22 @@
+routeD {{ .Chart.AppVersion }} installed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+Mode: {{ .Values.mode }}
+{{- if eq .Values.mode "inline" }}
+Upstream gateway: {{ default "(not set: ROUTED_UPSTREAM)" .Values.upstream }}
+{{- end }}
+
+The router serves traffic in {{ .Values.mode }} mode (inline ingress, decision
+and feedback APIs).
+{{- if .Values.operator.enabled }}
+The operator reconciles routed.io CRDs into snapshots and distributes them to
+the router over gRPC, with a "{{ .Values.operator.configmapName }}" ConfigMap
+fallback (ADR-0014).
+{{- else }}
+The operator is disabled; the router loads routing resources from the
+`routing` values (or its --resources / --snapshot-path flags).
+{{- end }}
+The CRDs under charts/routed/crds/ are installed by Helm on first install;
+upgrade them with `kubectl apply -f config/crd/`.
+
+Port-forward the router:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "routed.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}

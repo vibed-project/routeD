@@ -1,0 +1,54 @@
+{{- if and .Values.operator.enabled .Values.operator.webhook.enabled }}
+{{- $svcName := include "routed.operator.fullname" . }}
+{{- $secretName := printf "%s-webhook-tls" $svcName }}
+{{- $cn := printf "%s.%s.svc" $svcName .Release.Namespace }}
+{{- /* Reuse the existing certificate across upgrades so the caBundle and the
+       served certificate never disagree; generate on first install (lookup
+       returns nothing under `helm template`, which then also generates). */}}
+{{- $existing := lookup "v1" "Secret" .Release.Namespace $secretName }}
+{{- $crt := "" }}{{- $key := "" }}
+{{- if $existing }}
+{{- $crt = index $existing.data "tls.crt" | b64dec }}
+{{- $key = index $existing.data "tls.key" | b64dec }}
+{{- else }}
+{{- $gen := genSelfSignedCert $cn nil (list $cn (printf "%s.cluster.local" $cn)) 3650 }}
+{{- $crt = $gen.Cert }}
+{{- $key = $gen.Key }}
+{{- end }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $secretName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "routed.operator.labels" . | nindent 4 }}
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ $crt | b64enc }}
+  tls.key: {{ $key | b64enc }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ $svcName }}
+  labels:
+    {{- include "routed.operator.labels" . | nindent 4 }}
+webhooks:
+  - name: validate.routed.io
+    admissionReviewVersions: ["v1"]
+    sideEffects: None
+    failurePolicy: {{ .Values.operator.webhook.failurePolicy }}
+    timeoutSeconds: 5
+    clientConfig:
+      service:
+        name: {{ $svcName }}
+        namespace: {{ .Release.Namespace }}
+        path: /validate
+        port: 443
+      caBundle: {{ $crt | b64enc }}
+    rules:
+      - apiGroups: ["routed.io"]
+        apiVersions: ["v1alpha1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["modeltiers", "dataclasses", "routingpolicies", "routerprofiles"]
+{{- end }}

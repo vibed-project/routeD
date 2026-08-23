@@ -1,0 +1,11 @@
+# Helm values for the kind e2e: router in inline mode in front of the mock gateway,
+# routing resources from examples/001 mounted as a ConfigMap.
+image:
+  repository: localhost/routed
+  tag: e2e
+  pullPolicy: Never
+mode: inline
+upstream: http://routed-mockgateway:4000
+routing:
+  enabled: true
+  existingConfigMap: routed-e2e-resources

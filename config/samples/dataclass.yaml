@@ -1,0 +1,18 @@
+apiVersion: routed.io/v1alpha1
+kind: DataClass
+metadata:
+  name: personal
+  namespace: ai-platform
+spec:
+  rank: 3
+  description: "Contains personal data under GDPR"
+  detection:
+    headerValues: ["personal", "pii"]
+    piiEntities: [PERSON, EMAIL, PHONE, IBAN, NATIONAL_ID, HEALTH]
+    minConfidence: 0.7
+  constraints:
+    requireJurisdiction: [EU]
+    forbidCloudActExposed: true
+    requireOperatorControl: [eu-entity, on-prem]
+    forbidCapabilities: []
+    maxRetentionDays: 0

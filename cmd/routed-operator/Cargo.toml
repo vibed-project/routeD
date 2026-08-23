@@ -1,0 +1,43 @@
+[package]
+name = "routed-operator"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "routeD Kubernetes operator: reconciles routed.io CRDs into routing snapshots."
+
+[[bin]]
+name = "routed-operator"
+path = "src/main.rs"
+
+[dependencies]
+clap.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+futures-util.workspace = true
+tokio-stream.workspace = true
+axum.workspace = true
+hyper.workspace = true
+hyper-util = { workspace = true, features = ["service"] }
+tokio-rustls.workspace = true
+tonic.workspace = true
+tonic-prost.workspace = true
+prometheus-client.workspace = true
+k8s-openapi.workspace = true
+kube = { workspace = true, features = ["client", "runtime", "rustls-tls", "admission"] }
+rustls.workspace = true
+routed-version.workspace = true
+routed-telemetry.workspace = true
+routed-api.workspace = true
+routed-policy.workspace = true
+routed-snapshot.workspace = true
+routed-proto.workspace = true
+
+[lints]
+workspace = true

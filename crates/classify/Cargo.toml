@@ -1,0 +1,40 @@
+[package]
+name = "routed-classify"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "Classifier interfaces and implementations (stub, heuristic, HTTP, ONNX) producing task, complexity, sensitivity, and risk findings."
+
+[features]
+default = []
+# ONNX Runtime backed classifiers (phase 4, ADR-0016); off by default so the
+# core builds without ORT.
+onnx = ["dep:ort", "dep:tokenizers", "dep:routed-artifact"]
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+regex.workspace = true
+ureq.workspace = true
+ort = { workspace = true, optional = true }
+tokenizers = { workspace = true, optional = true }
+routed-artifact = { workspace = true, optional = true }
+routed-snapshot.workspace = true
+routed-decision.workspace = true
+routed-security.workspace = true
+routed-embed.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
+
+[[bench]]
+name = "classify"
+harness = false
+
+[lints]
+workspace = true

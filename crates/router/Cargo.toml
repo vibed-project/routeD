@@ -1,0 +1,25 @@
+[package]
+name = "routed-router"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "Request pipeline glue: context extraction, classification fan-out, decision, parameter computation, and telemetry emission."
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+routed-snapshot.workspace = true
+routed-decision.workspace = true
+routed-security.workspace = true
+routed-classify.workspace = true
+routed-cache.workspace = true
+routed-feedback.workspace = true
+routed-telemetry.workspace = true
+
+[lints]
+workspace = true

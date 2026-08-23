@@ -1,0 +1,13 @@
+{
+  "model": "auto",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant."
+    },
+    {
+      "role": "user",
+      "content": "Please email jane.doe@example.org about her IBAN DE89 3704 0044 0532 0130 00 payment."
+    }
+  ]
+}

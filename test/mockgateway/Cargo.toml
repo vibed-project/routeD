@@ -1,0 +1,33 @@
+[package]
+name = "routed-mockgateway"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "Mock OpenAI-compatible gateway for routeD tests: records received requests and replays scripted SSE streams."
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "routed-mockgateway"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tokio-stream.workspace = true
+tracing.workspace = true
+axum.workspace = true
+bytes.workspace = true
+base64.workspace = true
+futures-util.workspace = true
+routed-telemetry.workspace = true
+clap.workspace = true
+
+[lints]
+workspace = true

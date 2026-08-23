@@ -1,0 +1,91 @@
+{{- if .Values.operator.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "routed.operator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "routed.operator.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.operator.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "routed.operator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "routed.operator.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "routed.operator.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: operator
+          image: {{ include "routed.operator.image" . }}
+          imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
+          args:
+            - --metrics-addr={{ .Values.operator.metricsAddr }}
+            - --health-addr={{ .Values.operator.healthAddr }}
+            - --snapshot-grpc-addr={{ .Values.operator.snapshotGrpcAddr }}
+            - --namespace={{ .Release.Namespace }}
+            - --lease-name={{ .Values.operator.leaseName }}
+            - --configmap-name={{ .Values.operator.configmapName }}
+            {{- if .Values.operator.leaderElect }}
+            - --leader-elect
+            {{- end }}
+            {{- if .Values.operator.watchNamespace }}
+            - --watch-namespace={{ .Values.operator.watchNamespace }}
+            {{- end }}
+            {{- if .Values.operator.webhook.enabled }}
+            - --webhook-addr=0.0.0.0:{{ .Values.operator.webhook.port }}
+            - --webhook-certs-dir=/var/run/routed-webhook-certs
+            {{- end }}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.operator.metricsPort }}
+            - name: health
+              containerPort: {{ .Values.operator.healthPort }}
+            - name: grpc
+              containerPort: {{ .Values.operator.snapshotGrpcPort }}
+            {{- if .Values.operator.webhook.enabled }}
+            - name: webhook
+              containerPort: {{ .Values.operator.webhook.port }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: health
+            initialDelaySeconds: 1
+            periodSeconds: 5
+          {{- if .Values.operator.webhook.enabled }}
+          volumeMounts:
+            - name: webhook-tls
+              mountPath: /var/run/routed-webhook-certs
+              readOnly: true
+          {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.operator.resources | nindent 12 }}
+      {{- if .Values.operator.webhook.enabled }}
+      volumes:
+        - name: webhook-tls
+          secret:
+            secretName: {{ include "routed.operator.fullname" . }}-webhook-tls
+      {{- end }}
+{{- end }}

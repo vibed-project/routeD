@@ -1,0 +1,14 @@
+{{- if and .Values.routing.enabled (not .Values.routing.existingConfigMap) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "routed.fullname" . }}-resources
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "routed.labels" . | nindent 4 }}
+data:
+  {{- range $name, $content := .Values.routing.files }}
+  {{ $name }}: |
+    {{- $content | nindent 4 }}
+  {{- end }}
+{{- end }}

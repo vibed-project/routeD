@@ -1,0 +1,121 @@
+# Default values for routed.
+
+image:
+  repository: ghcr.io/vibed-project/routed
+  # Defaults to the chart appVersion.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Ingress mode of the router: inline (OpenAI-compatible forwarder) or extproc (Envoy external processor).
+mode: inline
+
+# Upstream gateway URL for inline mode (for example http://litellm:4000).
+upstream: ""
+
+# Routing resources (ModelTier, DataClass, RoutingPolicy, RouterProfile) compiled by the
+# router at startup and re-read when the ConfigMap changes. The snapshot source for
+# operator-less installs; ignored when operator.enabled is true (the router then
+# streams snapshots from the operator instead). Keys are file names, values are YAML.
+routing:
+  enabled: false
+  files: {}
+  # Name of an existing ConfigMap to mount instead of rendering one from `files`.
+  existingConfigMap: ""
+
+# Feedback persistence (ADR-0018): the decision journal and accepted
+# feedback as JSONL on an emptyDir, for offline training. Ship the files
+# with your own sidecar or collector.
+feedback:
+  enabled: false
+  dir: /var/lib/routed/feedback
+
+# OTLP gRPC endpoint for trace export (empty disables).
+otlpEndpoint: ""
+
+# HTTP port: inline ingress (inline mode), decision API, feedback API, health and metrics.
+# gRPC port: Envoy ext_proc server (extproc mode only).
+
+replicaCount: 1
+terminationGracePeriodSeconds: 75
+
+service:
+  type: ClusterIP
+  port: 8080
+  extprocPort: 9002
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+rbac:
+  create: true
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Extra environment variables for the router container.
+extraEnv: []
+
+operator:
+  # The operator reconciles routed.io CRDs into routing snapshots and
+  # distributes them to routed over gRPC, with a ConfigMap fallback
+  # (ADR-0014). Disabled by default: the router falls back to `routing`
+  # below, or its own --resources/--snapshot-path/--snapshot-addr flags.
+  enabled: false
+  image:
+    repository: ghcr.io/vibed-project/routed-operator
+    tag: ""
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  serviceAccount:
+    create: true
+    name: ""
+  leaderElect: true
+  # How the router receives snapshots from the operator (ADR-0014):
+  # grpc streams from the operator's SnapshotService; configmap mounts the
+  # operator-published fallback ConfigMap into the router as a file.
+  distribution: grpc
+  metricsAddr: "0.0.0.0:8080"
+  metricsPort: 8080
+  healthAddr: "0.0.0.0:8081"
+  healthPort: 8081
+  snapshotGrpcAddr: "0.0.0.0:9090"
+  snapshotGrpcPort: 9090
+  # Restrict the operator to one namespace; empty watches all namespaces.
+  watchNamespace: ""
+  # Name of the leader election Lease and the fallback snapshot ConfigMap.
+  leaseName: "routed-operator-leader"
+  configmapName: "routed-snapshot"
+  # Validating admission webhook (ADR-0015): rejects CRD writes whose
+  # compilation fails, using the same compiler as the reconciler. Ignore
+  # keeps CRD writes working through a webhook outage; the operator's status
+  # conditions remain the async safety net. Set Fail for hard gating.
+  webhook:
+    enabled: false
+    failurePolicy: Ignore
+    port: 9443
+  resources: {}

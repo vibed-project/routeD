@@ -1,0 +1,128 @@
+# SPDX-License-Identifier: Apache-2.0
+# Release pipeline (ADR-0019): a v* tag builds multi-arch images, signs them
+# with cosign keyless, generates CycloneDX SBOMs, pushes the Helm chart as an
+# OCI artifact, and publishes a GitHub release with checksummed artifacts.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write   # create the GitHub release
+  packages: write   # push images and the chart to GHCR
+  id-token: write   # cosign keyless signing
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BASE: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@1.92.0
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: Full CI gate
+        run: make ci CARGO=cargo
+      - name: Tag matches the workspace version
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          grep -q "^version = \"$v\"$" Cargo.toml || {
+            echo "tag $GITHUB_REF_NAME does not match workspace version"; exit 1; }
+
+  images:
+    needs: gate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [routed, routed-operator]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: sigstore/cosign-installer@v3
+      - name: Build and push
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: build/${{ matrix.component }}.Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            COMMIT=${{ github.sha }}
+          tags: |
+            ${{ env.IMAGE_BASE }}/${{ matrix.component }}:${{ github.ref_name }}
+            ${{ env.IMAGE_BASE }}/${{ matrix.component }}:latest
+      - name: Sign (keyless)
+        env:
+          COSIGN_YES: "true"
+        run: |
+          cosign sign "${{ env.IMAGE_BASE }}/${{ matrix.component }}@${{ steps.push.outputs.digest }}"
+
+  sbom:
+    needs: gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@1.92.0
+      - uses: Swatinem/rust-cache@v2
+      - name: Install cargo-cyclonedx
+        run: cargo install --locked cargo-cyclonedx --version 0.5.7
+      - name: Generate SBOMs
+        run: make sbom CARGO=cargo
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom/
+
+  chart:
+    needs: gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: azure/setup-helm@v4
+      - name: Package and push chart (OCI)
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} \
+            --username ${{ github.actor }} --password-stdin
+          helm package charts/routed --version "${GITHUB_REF_NAME#v}" \
+            --app-version "${GITHUB_REF_NAME#v}"
+          helm push routed-"${GITHUB_REF_NAME#v}".tgz "oci://${IMAGE_BASE}/charts"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chart
+          path: routed-*.tgz
+
+  publish:
+    needs: [images, sbom, chart]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        run: cd dist && sha256sum * > SHA256SUMS
+      - name: Release notes from the changelog
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          awk "/^## \\[$v\\]/{f=1;next} /^## \\[/{f=0} f" CHANGELOG.md > dist/NOTES.md
+          test -s dist/NOTES.md || echo "See CHANGELOG.md." > dist/NOTES.md
+      - uses: softprops/action-gh-release@v2
+        with:
+          body_path: dist/NOTES.md
+          files: |
+            dist/*.tgz
+            dist/*.cdx.json
+            dist/SHA256SUMS

@@ -1,0 +1,203 @@
+{
+  "title": "routeD",
+  "uid": "routed",
+  "schemaVersion": 39,
+  "tags": [
+    "routed",
+    "ai-routing"
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Decisions / s",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(routed_decisions_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Blocked / s",
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(routed_blocked_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Estimated savings EUR / h",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(routed_estimated_savings_eur_total[1h])) * 3600"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Snapshot age (s)",
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "max(routed_snapshot_age_seconds)"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Decisions by outcome",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (outcome) (rate(routed_decisions_total[5m]))",
+          "legendFormat": "{{outcome}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Decisions by tier",
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (tier) (rate(routed_decisions_total[5m]))",
+          "legendFormat": "{{tier}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Decision latency p50 / p95 / p99",
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(routed_decision_latency_seconds_bucket[5m])))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(routed_decision_latency_seconds_bucket[5m])))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(routed_decision_latency_seconds_bucket[5m])))",
+          "legendFormat": "p99"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Classifier latency p95 by classifier",
+      "gridPos": {
+        "x": 12,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, name) (rate(routed_classifier_latency_seconds_bucket[5m])))",
+          "legendFormat": "{{name}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Estimated cost EUR / h by tier",
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (name) (rate(routed_estimated_cost_eur_total[1h])) * 3600",
+          "legendFormat": "{{name}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Decisions by data class",
+      "gridPos": {
+        "x": 12,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (data_class) (rate(routed_decisions_total[5m]))",
+          "legendFormat": "{{data_class}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Classifier errors / blocked reasons / ignored hints",
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (classifier, kind) (rate(routed_classifier_errors_total[5m]))",
+          "legendFormat": "classifier {{classifier}} {{kind}}"
+        },
+        {
+          "expr": "sum by (name) (rate(routed_blocked_total[5m]))",
+          "legendFormat": "blocked {{name}}"
+        },
+        {
+          "expr": "sum by (name) (rate(routed_hint_ignored_total[5m]))",
+          "legendFormat": "hint ignored {{name}}"
+        }
+      ]
+    }
+  ]
+}

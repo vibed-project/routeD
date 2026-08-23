@@ -1,0 +1,45 @@
+{{- if .Values.rbac.create }}
+{{- if .Values.operator.enabled }}
+{{/*
+The router never talks to the Kubernetes API in either distribution mode
+(ADR-0014): gRPC is a plain client connection, and the fallback ConfigMap is
+read through a mounted volume, which kubelet populates using the node's
+credentials, not the pod's ServiceAccount. Only the operator needs RBAC.
+*/}}
+# Operator: reconcile routed.io resources cluster-wide, publish snapshots, hold a leader lease.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "routed.operator.fullname" . }}
+  labels:
+    {{- include "routed.operator.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["routed.io"]
+    resources: ["modeltiers", "dataclasses", "routingpolicies", "routerprofiles"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["routed.io"]
+    resources: ["modeltiers/status", "dataclasses/status", "routingpolicies/status", "routerprofiles/status"]
+    verbs: ["get", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "routed.operator.fullname" . }}
+  labels:
+    {{- include "routed.operator.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "routed.operator.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "routed.operator.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- end }}

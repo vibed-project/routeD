@@ -1,0 +1,6 @@
+{
+  "degraded": [
+    "pii:timeout"
+  ],
+  "riskScore": 0.99
+}

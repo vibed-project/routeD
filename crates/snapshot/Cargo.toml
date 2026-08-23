@@ -1,0 +1,21 @@
+[package]
+name = "routed-snapshot"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "Immutable, content-hashed routing snapshot compiled from CRDs, plus the hot-swappable holder used by the router."
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+hex.workspace = true
+arc-swap.workspace = true
+strum.workspace = true
+routed-api.workspace = true
+
+[lints]
+workspace = true

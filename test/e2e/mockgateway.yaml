@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: routed-mockgateway
+  labels: { app: routed-mockgateway }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: routed-mockgateway }
+  template:
+    metadata:
+      labels: { app: routed-mockgateway }
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 65532, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: mock
+          image: localhost/routed-mockgateway:e2e
+          imagePullPolicy: Never
+          ports: [{ containerPort: 4000, name: http }]
+          readinessProbe: { httpGet: { path: /healthz, port: http } }
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: routed-mockgateway
+spec:
+  selector: { app: routed-mockgateway }
+  ports: [{ port: 4000, targetPort: http, name: http }]

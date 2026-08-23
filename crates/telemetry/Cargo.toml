@@ -1,0 +1,26 @@
+[package]
+name = "routed-telemetry"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "OpenTelemetry setup, metrics registry, decision span helpers, and structured JSON logging."
+
+[dependencies]
+anyhow.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+tracing-opentelemetry.workspace = true
+opentelemetry.workspace = true
+opentelemetry_sdk.workspace = true
+opentelemetry-otlp.workspace = true
+prometheus-client.workspace = true
+sha2.workspace = true
+hex.workspace = true
+routed-decision.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,22 @@
+{
+  "model": "auto",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant."
+    },
+    {
+      "role": "user",
+      "content": "Book a meeting for tomorrow at 10."
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "book_meeting",
+        "parameters": {}
+      }
+    }
+  ]
+}

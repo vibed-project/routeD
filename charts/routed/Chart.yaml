@@ -1,0 +1,20 @@
+apiVersion: v2
+name: routed
+description: Kubernetes-native semantic router for AI models. A decision layer that picks the model tier per request (security and sovereignty first, then cost and quality) and hands enforcement to your existing LLM gateway.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.29.0-0"
+home: https://github.com/vibed-project/routed
+sources:
+  - https://github.com/vibed-project/routed
+keywords:
+  - llm
+  - ai
+  - routing
+  - envoy
+  - litellm
+  - sovereignty
+maintainers:
+  - name: routeD maintainers
+    url: https://github.com/vibed-project/routed

@@ -1,0 +1,5 @@
+{
+  "degraded": [
+    "heuristic:timeout"
+  ]
+}

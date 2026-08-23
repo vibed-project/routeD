@@ -1,0 +1,10 @@
+# Helm values for the kind e2e ext_proc scenario: routed as an Envoy external
+# processor (ADR-0017), snapshot from the routing resources ConfigMap.
+image:
+  repository: localhost/routed
+  tag: e2e
+  pullPolicy: Never
+mode: extproc
+routing:
+  enabled: true
+  existingConfigMap: routed-e2e-resources

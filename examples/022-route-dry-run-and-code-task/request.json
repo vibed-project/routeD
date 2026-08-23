@@ -1,0 +1,13 @@
+{
+  "model": "auto",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant."
+    },
+    {
+      "role": "user",
+      "content": "Write a Python function that reverses a list and add unit tests."
+    }
+  ]
+}

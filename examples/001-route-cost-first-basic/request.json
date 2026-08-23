@@ -1,0 +1,13 @@
+{
+  "model": "auto",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant."
+    },
+    {
+      "role": "user",
+      "content": "Summarize the attached quarterly report in three bullet points."
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+[package]
+name = "routedctl"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "routedctl: validate policies, explain and simulate decisions, manage model artifacts."
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "routedctl"
+path = "src/main.rs"
+
+[dependencies]
+clap.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml_ng.workspace = true
+k8s-openapi.workspace = true
+routed-version.workspace = true
+routed-artifact.workspace = true
+routed-api.workspace = true
+routed-policy.workspace = true
+routed-decision.workspace = true
+routed-snapshot.workspace = true
+routed-classify.workspace = true
+routed-security.workspace = true
+routed-router.workspace = true
+
+[dev-dependencies]
+strum.workspace = true
+
+[lints]
+workspace = true

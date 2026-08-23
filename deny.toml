@@ -1,0 +1,46 @@
+# cargo-deny configuration. Run with `make deny`.
+[graph]
+all-features = true
+targets = [
+  { triple = "x86_64-unknown-linux-gnu" },
+  { triple = "aarch64-unknown-linux-gnu" },
+]
+
+[advisories]
+db-path = ".cache/advisory-db"
+yanked = "deny"
+ignore = [
+  # `paste` is unmaintained (informational, no vulnerability). Build-time
+  # proc-macro pulled in by `tokenizers` (feature `onnx`); drop this when
+  # tokenizers moves off it.
+  "RUSTSEC-2024-0436",
+]
+
+[licenses]
+allow = [
+  "Apache-2.0",
+  "MIT",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Zlib",
+  "Unicode-3.0",
+  "CC0-1.0",
+  "0BSD",
+  "CDLA-Permissive-2.0",
+]
+confidence-threshold = 0.9
+exceptions = []
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+# Workspace path dependencies carry no version; that is not a wildcard for our purposes.
+allow-wildcard-paths = true
+deny = [
+  { crate = "openssl-sys", reason = "routeD links rustls only" },
+]
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"

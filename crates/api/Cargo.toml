@@ -1,0 +1,19 @@
+[package]
+name = "routed-api"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "CRD types for the routed.io/v1alpha1 API group (ModelTier, DataClass, RoutingPolicy, RouterProfile)."
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+schemars.workspace = true
+kube.workspace = true
+k8s-openapi.workspace = true
+
+[lints]
+workspace = true

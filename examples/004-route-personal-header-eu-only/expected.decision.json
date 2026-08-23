@@ -1,0 +1,52 @@
+{
+  "id": "01JGOLDEN0000000000000000",
+  "outcome": "ROUTE",
+  "policy": "ai-platform/default-cost-secure",
+  "requestedModel": "auto",
+  "selectedTier": "eu-sovereign-large",
+  "gatewayModel": "mistral-large-eu",
+  "parameters": {
+    "reasoning": "none"
+  },
+  "dataClass": "personal",
+  "classification": {
+    "task": "chat",
+    "complexity": "low",
+    "riskScore": 0.0
+  },
+  "candidates": [
+    {
+      "tier": "ch-onprem-mid",
+      "eliminatedBy": "dataClass.requireJurisdiction"
+    },
+    {
+      "tier": "eu-hyperscaler",
+      "eliminatedBy": "dataClass.forbidCloudActExposed"
+    },
+    {
+      "tier": "eu-region-us-vendor",
+      "eliminatedBy": "dataClass.requireOperatorControl"
+    },
+    {
+      "tier": "eu-sovereign-large",
+      "predictedQuality": 0.82,
+      "estimatedCostEUR": 0.001588,
+      "score": 0.7,
+      "selected": true
+    },
+    {
+      "tier": "eu-sovereign-small",
+      "eliminatedBy": "qualityFloor",
+      "predictedQuality": 0.7,
+      "estimatedCostEUR": 0.000159
+    },
+    {
+      "tier": "us-cheap-small",
+      "eliminatedBy": "dataClass.allowedDataClasses"
+    }
+  ],
+  "estimatedCostEUR": 0.001588,
+  "estimatedSavingsEUR": 0.0,
+  "latencyMs": 0,
+  "snapshotHash": "sha256:108b07fab247f8e36f61e6e6a71b1aaa3d7e3b0a1a33f7d99304273a5171b6db"
+}

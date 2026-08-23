@@ -1,0 +1,16 @@
+{
+  "model": "routed/fast",
+  "system": "Be terse.",
+  "max_tokens": 64,
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "Translate 'good morning' into German."
+        }
+      ]
+    }
+  ]
+}

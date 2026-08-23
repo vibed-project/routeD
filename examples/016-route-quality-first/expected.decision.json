@@ -1,0 +1,59 @@
+{
+  "id": "01JGOLDEN0000000000000000",
+  "outcome": "ROUTE",
+  "policy": "ai-platform/default-cost-secure",
+  "requestedModel": "auto",
+  "selectedTier": "eu-sovereign-large",
+  "gatewayModel": "mistral-large-eu",
+  "parameters": {
+    "reasoning": "none"
+  },
+  "classification": {
+    "task": "chat",
+    "complexity": "low",
+    "riskScore": 0.0
+  },
+  "candidates": [
+    {
+      "tier": "ch-onprem-mid",
+      "predictedQuality": 0.8,
+      "estimatedCostEUR": 0.00237,
+      "score": 0.631429
+    },
+    {
+      "tier": "eu-hyperscaler",
+      "predictedQuality": 0.8,
+      "estimatedCostEUR": 0.00237,
+      "score": 0.591429
+    },
+    {
+      "tier": "eu-region-us-vendor",
+      "predictedQuality": 0.8,
+      "estimatedCostEUR": 0.00237,
+      "score": 0.611429
+    },
+    {
+      "tier": "eu-sovereign-large",
+      "predictedQuality": 0.82,
+      "estimatedCostEUR": 0.00158,
+      "score": 0.835458,
+      "selected": true
+    },
+    {
+      "tier": "eu-sovereign-small",
+      "eliminatedBy": "qualityFloor",
+      "predictedQuality": 0.7,
+      "estimatedCostEUR": 0.000158
+    },
+    {
+      "tier": "us-cheap-small",
+      "predictedQuality": 0.75,
+      "estimatedCostEUR": 0.000142,
+      "score": 0.2
+    }
+  ],
+  "estimatedCostEUR": 0.00158,
+  "estimatedSavingsEUR": 0.00079,
+  "latencyMs": 0,
+  "snapshotHash": "sha256:925432da2ffd2eb17e2d0f8de96dfd11b6093ba871e89a8d840d5a70a8135abf"
+}

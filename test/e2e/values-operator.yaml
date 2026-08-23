@@ -1,0 +1,20 @@
+# Helm values for the kind e2e operator scenario: the operator reconciles the
+# example CRs into a snapshot and the router receives it over gRPC (ADR-0014).
+image:
+  repository: localhost/routed
+  tag: e2e
+  pullPolicy: Never
+mode: inline
+upstream: http://routed-mockgateway:4000
+routing:
+  enabled: false
+operator:
+  enabled: true
+  image:
+    repository: localhost/routed-operator
+    tag: e2e
+    pullPolicy: Never
+  webhook:
+    enabled: true
+    # Fail so the denial test is deterministic; production default is Ignore.
+    failurePolicy: Fail

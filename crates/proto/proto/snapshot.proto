@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: Apache-2.0
+syntax = "proto3";
+
+package routed.snapshot.v1;
+
+// Distributes the compiled routing snapshot from routed-operator to routed.
+// The payload is the canonical routed_snapshot::Snapshot JSON (ADR-0014):
+// protobuf is transport only, not a second schema for the same data.
+service SnapshotService {
+  // Streams the current snapshot immediately, then every time it changes.
+  rpc Watch(WatchRequest) returns (stream SnapshotChunk);
+}
+
+message WatchRequest {
+  // Caller identity, for operator logs and metrics only.
+  string client = 1;
+}
+
+message SnapshotChunk {
+  // Canonical JSON of routed_snapshot::Snapshot, including its hash.
+  string snapshot_json = 1;
+}

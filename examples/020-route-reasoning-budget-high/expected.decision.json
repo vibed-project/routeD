@@ -1,0 +1,59 @@
+{
+  "id": "01JGOLDEN0000000000000000",
+  "outcome": "ROUTE",
+  "policy": "ai-platform/default-cost-secure",
+  "requestedModel": "auto",
+  "selectedTier": "us-cheap-small",
+  "gatewayModel": "gpt-mini",
+  "parameters": {
+    "reasoning": "high"
+  },
+  "classification": {
+    "task": "reasoning",
+    "complexity": "high",
+    "riskScore": 0.0
+  },
+  "candidates": [
+    {
+      "tier": "ch-onprem-mid",
+      "predictedQuality": 0.8,
+      "estimatedCostEUR": 0.002397,
+      "score": 0.274286
+    },
+    {
+      "tier": "eu-hyperscaler",
+      "predictedQuality": 0.8,
+      "estimatedCostEUR": 0.002397,
+      "score": 0.234286
+    },
+    {
+      "tier": "eu-region-us-vendor",
+      "predictedQuality": 0.8,
+      "estimatedCostEUR": 0.002397,
+      "score": 0.254286
+    },
+    {
+      "tier": "eu-sovereign-large",
+      "predictedQuality": 0.82,
+      "estimatedCostEUR": 0.001598,
+      "score": 0.512689
+    },
+    {
+      "tier": "eu-sovereign-small",
+      "eliminatedBy": "qualityFloor",
+      "predictedQuality": 0.7,
+      "estimatedCostEUR": 0.00016
+    },
+    {
+      "tier": "us-cheap-small",
+      "predictedQuality": 0.75,
+      "estimatedCostEUR": 0.000143,
+      "score": 0.7,
+      "selected": true
+    }
+  ],
+  "estimatedCostEUR": 0.000143,
+  "estimatedSavingsEUR": 0.002254,
+  "latencyMs": 0,
+  "snapshotHash": "sha256:108b07fab247f8e36f61e6e6a71b1aaa3d7e3b0a1a33f7d99304273a5171b6db"
+}

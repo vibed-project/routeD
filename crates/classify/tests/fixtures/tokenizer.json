@@ -1,0 +1,51 @@
+{
+ "version": "1.0",
+ "truncation": null,
+ "padding": null,
+ "added_tokens": [],
+ "normalizer": {
+  "type": "Lowercase"
+ },
+ "pre_tokenizer": {
+  "type": "Whitespace"
+ },
+ "post_processor": null,
+ "decoder": null,
+ "model": {
+  "type": "WordLevel",
+  "vocab": {
+   "[UNK]": 0,
+   "hello": 1,
+   "world": 2,
+   "summarise": 3,
+   "the": 4,
+   "quarterly": 5,
+   "report": 6,
+   "please": 7,
+   "ignore": 8,
+   "all": 9,
+   "previous": 10,
+   "instructions": 11,
+   "and": 12,
+   "reveal": 13,
+   "your": 14,
+   "system": 15,
+   "prompt": 16,
+   "you": 17,
+   "are": 18,
+   "now": 19,
+   "dan": 20,
+   "my": 21,
+   "email": 22,
+   "is": 23,
+   "iban": 24,
+   "word": 25,
+   "deterministic": 26,
+   "anything": 27,
+   "a": 28,
+   "b": 29,
+   "c": 30
+  },
+  "unk_token": "[UNK]"
+ }
+}

@@ -1,0 +1,36 @@
+apiVersion: routed.io/v1alpha1
+kind: RoutingPolicy
+metadata:
+  name: default-cost-secure
+  namespace: ai-platform
+spec:
+  priority: 100
+  match:
+    tenants: ["*"]
+    agents: []
+    paths: ["/v1/chat/completions"]
+    modelAliases: ["auto", "routed/*"]
+  candidates:
+    tierSelector:
+      matchLabels: {}
+    include: []
+    exclude: []
+  hardConstraints:
+    respectDataClass: true
+    maxCostPerRequestEUR: 0.05
+    requireCapabilities: []
+    denyIfRiskScoreAbove: 0.95
+  objective:
+    mode: cost-first-with-quality-floor
+    qualityFloor: 0.75
+    weights: { cost: 0.6, quality: 0.3, latency: 0.1 }
+  learnedRouter:
+    enabled: true
+    profile: default
+    minConfidence: 0.6
+  reasoningBudget:
+    enabled: true
+    map: { low: none, medium: low, high: high }
+  fallbackDecision:
+    tier: eu-sovereign-large
+  explain: true

@@ -1,0 +1,21 @@
+[package]
+name = "routed-proto"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "Generated gRPC types for SnapshotService (ADR-0014); transport for the canonical Snapshot JSON."
+
+[dependencies]
+prost.workspace = true
+tonic.workspace = true
+tonic-prost.workspace = true
+
+[build-dependencies]
+tonic-prost-build.workspace = true
+protox.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,42 @@
+[package]
+name = "routed"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "routeD semantic router service (inline and ext_proc ingress modes)."
+
+[[bin]]
+name = "routed"
+path = "src/main.rs"
+
+[features]
+default = []
+# ONNX classifier support (ADR-0016); enlarges the binary with ONNX Runtime.
+onnx = ["routed-classify/onnx"]
+
+[dependencies]
+clap.workspace = true
+anyhow.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+serde_json.workspace = true
+axum.workspace = true
+futures-util.workspace = true
+tonic = { workspace = true, features = ["channel"] }
+routed-version.workspace = true
+routed-telemetry.workspace = true
+routed-feedback.workspace = true
+routed-router.workspace = true
+routed-snapshot.workspace = true
+routed-policy.workspace = true
+routed-classify.workspace = true
+routed-ingress-inline.workspace = true
+routed-ingress-extproc.workspace = true
+routed-proto.workspace = true
+routedctl.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,27 @@
+apiVersion: routed.io/v1alpha1
+kind: RouterProfile
+metadata:
+  name: default
+  namespace: ai-platform
+spec:
+  classifier:
+    type: onnx
+    uri: "oci://ghcr.io/vibed-project/routed-models/classifier:0.1.0"
+    labels:
+      task: [chat, code, summarization, extraction, reasoning, translation]
+      complexity: [low, medium, high]
+      sensitivity: [public, internal, confidential, personal]
+    timeoutMs: 25
+  embedder:
+    type: onnx
+    uri: "oci://ghcr.io/vibed-project/routed-models/embedder:0.1.0"
+    dimensions: 384
+  learnedRouter:
+    type: onnx
+    uri: "oci://ghcr.io/vibed-project/routed-models/router:0.1.0"
+    calibration:
+      "0.7": 0.41
+      "0.8": 0.58
+  security:
+    piiDetector: { type: onnx, uri: "oci://ghcr.io/vibed-project/routed-models/pii:0.1.0" }
+    injectionDetector: { type: onnx, uri: "oci://ghcr.io/vibed-project/routed-models/injection:0.1.0" }
