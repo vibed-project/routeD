@@ -66,7 +66,13 @@ async fn harness_with(classifier: Arc<dyn Classifier>, mut config: Config, ready
 async fn harness() -> Harness {
     harness_with(
         Arc::new(HeuristicClassifier::default()),
-        Config::default(),
+        Config {
+            // Generous: shared CI runners can stall the blocking pool past
+            // the 25ms production default, which would flip assertions to
+            // the fallback decision (ADR-0006) instead of what they test.
+            classify_timeout: Duration::from_secs(5),
+            ..Config::default()
+        },
         true,
     )
     .await
@@ -293,6 +299,7 @@ async fn decide_api_and_feedback() {
 async fn rejects_oversized_malformed_and_not_ready() {
     let cfg = Config {
         max_body_bytes: 2048,
+        classify_timeout: Duration::from_secs(5),
         ..Config::default()
     };
     let h = harness_with(Arc::new(HeuristicClassifier::default()), cfg, true).await;
@@ -555,6 +562,7 @@ async fn client_disconnect_propagates_upstream() {
 async fn idle_stream_times_out() {
     let cfg = Config {
         stream_idle_timeout: Duration::from_millis(200),
+        classify_timeout: Duration::from_secs(5),
         ..Config::default()
     };
     let h = harness_with(Arc::new(HeuristicClassifier::default()), cfg, true).await;
@@ -674,6 +682,7 @@ async fn upstream_cannot_spoof_decision_headers() {
 async fn chunked_oversized_body_is_rejected() {
     let cfg = Config {
         max_body_bytes: 1024,
+        classify_timeout: Duration::from_secs(5),
         ..Config::default()
     };
     let h = harness_with(Arc::new(HeuristicClassifier::default()), cfg, true).await;
@@ -737,6 +746,7 @@ async fn feedback_and_decision_journal_are_persisted() {
     holder.store(resources());
     let config = Config {
         upstream: format!("http://{mock_addr}"),
+        classify_timeout: Duration::from_secs(5),
         ..Config::default()
     };
     let state = Arc::new(

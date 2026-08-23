@@ -15,3 +15,8 @@ updates:
     directory: "/build"
     schedule:
       interval: weekly
+    ignore:
+      # The Rust toolchain is pinned across rust-toolchain.toml, the
+      # toolchain Containerfile and CI; bumping it is a coordinated change
+      # the hygiene check enforces, not a base-image bump.
+      - dependency-name: "library/rust" 

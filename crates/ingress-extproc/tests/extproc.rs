@@ -35,6 +35,8 @@ fn state() -> Arc<AppState> {
     let config = Config {
         // Never contacted in extproc mode; must only parse as a URL.
         upstream: "http://127.0.0.1:9".into(),
+        // Generous for shared CI runners (see the inline harness note).
+        classify_timeout: std::time::Duration::from_secs(5),
         ..Config::default()
     };
     Arc::new(
