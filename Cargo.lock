@@ -2927,7 +2927,7 @@ dependencies = [
  "hyper-util",
  "indexmap",
  "opentelemetry",
- "rand 0.9.5",
+ "rand 0.10.2",
  "routed-classify",
  "routed-decision",
  "routed-feedback",
