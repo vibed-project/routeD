@@ -74,7 +74,7 @@ envoy-types = "0.7"
 # libstdc++ than the pinned bookworm toolchain ships; the Microsoft shared
 # library is loaded at runtime via ORT_DYLIB_PATH instead (`make onnx`).
 ort = { version = "2.0.0-rc.10", default-features = false, features = ["load-dynamic", "std"] }
-tokenizers = { version = "0.21", default-features = false, features = ["onig"] }
+tokenizers = { version = "0.23", default-features = false, features = ["onig"] }
 # --- workspace crates ---
 routed-version = { path = "crates/version" }
 routed-api = { path = "crates/api" }
