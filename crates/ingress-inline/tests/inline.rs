@@ -823,3 +823,99 @@ async fn feedback_and_decision_journal_are_persisted() {
     assert_eq!(f["outcome"]["rating"], 5);
     std::fs::remove_dir_all(&dir).ok();
 }
+
+/// Test authenticator: requires `authorization: Bearer good-token` (ADR-0020).
+struct BearerGate;
+
+impl routed_ingress_inline::authn::Authenticator for BearerGate {
+    fn authenticate(
+        &self,
+        headers: &http::HeaderMap,
+    ) -> routed_ingress_inline::authn::AuthDecision {
+        use routed_ingress_inline::authn::{AuthDecision, Identity};
+        match headers.get("authorization").and_then(|v| v.to_str().ok()) {
+            Some("Bearer good-token") => AuthDecision::Allow(Identity {
+                subject: "tester".into(),
+                groups: vec!["platform".into()],
+            }),
+            Some(_) => AuthDecision::Deny {
+                status: 403,
+                reason: "unknown principal".into(),
+            },
+            None => AuthDecision::Deny {
+                status: 401,
+                reason: "missing bearer token".into(),
+            },
+        }
+    }
+    fn name(&self) -> &'static str {
+        "bearer-gate"
+    }
+}
+
+#[tokio::test]
+async fn authenticator_gates_decide_and_feedback_but_not_health() {
+    let (mock_addr, mock) = routed_mockgateway::spawn().await.unwrap();
+    let holder = Arc::new(SnapshotHolder::new());
+    holder.store(resources());
+    let state = Arc::new(
+        AppState::new(
+            holder,
+            Arc::new(HeuristicClassifier::default()),
+            Arc::new(Telemetry::for_tests()),
+            Config {
+                upstream: format!("http://{mock_addr}"),
+                classify_timeout: Duration::from_secs(5),
+                ..Config::default()
+            },
+        )
+        .unwrap()
+        .with_authenticator(Arc::new(BearerGate)),
+    );
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+    let app = router(Arc::clone(&state));
+    tokio::spawn(async move {
+        axum::serve(listener, app).await.unwrap();
+    });
+    let h = Harness {
+        addr,
+        mock,
+        state,
+        client: Client::builder(TokioExecutor::new()).build_http(),
+    };
+
+    // No credential: 401 with the OpenAI error envelope; nothing forwarded.
+    let (status, _, body) = h.post_json("/v1/decide", &[], &chat("auto", "hello")).await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED, "{body}");
+    let v: serde_json::Value = serde_json::from_str(&body).unwrap();
+    assert_eq!(v["error"]["code"], "unauthorized");
+
+    // Wrong credential: 403.
+    let (status, _, _) = h
+        .post_json(
+            "/v1/decide",
+            &[("authorization", "Bearer wrong")],
+            &chat("auto", "hello"),
+        )
+        .await;
+    assert_eq!(status, StatusCode::FORBIDDEN);
+
+    // Feedback is gated the same way.
+    let (status, _, _) = h.post_json("/v1/feedback", &[], "{}").await;
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+
+    // Valid credential: the APIs work.
+    let (status, _, body) = h
+        .post_json(
+            "/v1/decide",
+            &[("authorization", "Bearer good-token")],
+            &chat("auto", "hello"),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+
+    // Health endpoints stay open (liveness probes carry no credentials).
+    let resp = h.send(Method::GET, "/healthz", &[], String::new()).await;
+    assert_eq!(resp.status(), StatusCode::OK);
+}

@@ -94,7 +94,15 @@ pub async fn metrics(State(state): State<Arc<AppState>>) -> Response {
 }
 
 /// `POST /v1/feedback` (ingestion lands fully in phase 6; events are logged now).
-pub async fn feedback(State(state): State<Arc<AppState>>, body: axum::body::Bytes) -> Response {
+pub async fn feedback(
+    State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
+    body: axum::body::Bytes,
+) -> Response {
+    if let crate::authn::AuthDecision::Deny { status, reason } = state.authn.authenticate(&headers)
+    {
+        return crate::errors::auth_denied(status, &reason);
+    }
     if body.len() > 64 * 1024 {
         return too_large(64 * 1024);
     }
@@ -284,6 +292,11 @@ pub async fn decide_bytes(
 /// `POST /v1/decide`: returns the decision JSON, never forwards.
 #[tracing::instrument(name = "routed.decision", skip_all, fields(routed.mode = "decide"))]
 pub async fn decide(State(state): State<Arc<AppState>>, req: Request) -> Response {
+    if let crate::authn::AuthDecision::Deny { status, reason } =
+        state.authn.authenticate(req.headers())
+    {
+        return crate::errors::auth_denied(status, &reason);
+    }
     let limit = state.config.max_body_bytes;
     let path = match req
         .headers()
