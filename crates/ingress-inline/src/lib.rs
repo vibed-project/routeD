@@ -6,6 +6,7 @@
 //!
 //! Zero buffering of response bodies is a tested invariant.
 
+pub mod authn;
 mod body;
 pub mod errors;
 mod forward;
@@ -71,6 +72,8 @@ pub struct AppState {
     pub engine: Engine<SharedPredictor>,
     /// Feedback / decision-journal sink (ADR-0018).
     pub feedback: Arc<dyn FeedbackSink>,
+    /// Caller authentication for the decision APIs (ADR-0020).
+    pub authn: Arc<dyn authn::Authenticator>,
     /// Classifier.
     pub classifier: Arc<dyn Classifier>,
     /// Upstream client.
@@ -134,6 +137,7 @@ impl AppState {
             snapshot,
             engine: Engine::with_predictor(Arc::new(NoPredictor)),
             feedback: Arc::new(routed_feedback::NullSink),
+            authn: Arc::new(authn::AllowAll),
             classifier,
             upstream,
             classify_sem: Arc::new(Semaphore::new(config.classify_concurrency.max(1))),
@@ -154,6 +158,13 @@ impl AppState {
     #[must_use]
     pub fn with_feedback(mut self, sink: Arc<dyn FeedbackSink>) -> Self {
         self.feedback = sink;
+        self
+    }
+
+    /// Attach a caller authenticator for the decision APIs (ADR-0020).
+    #[must_use]
+    pub fn with_authenticator(mut self, authenticator: Arc<dyn authn::Authenticator>) -> Self {
+        self.authn = authenticator;
         self
     }
 

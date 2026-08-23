@@ -31,6 +31,16 @@ pub fn error_response(
     resp
 }
 
+/// 401/403 from the authenticator (ADR-0020). Any other status maps to 401.
+#[must_use]
+pub fn auth_denied(status: u16, reason: &str) -> Response {
+    let (status, code) = match status {
+        403 => (StatusCode::FORBIDDEN, "forbidden"),
+        _ => (StatusCode::UNAUTHORIZED, "unauthorized"),
+    };
+    error_response(status, "invalid_request_error", code, reason, None)
+}
+
 /// 400 invalid request.
 #[must_use]
 pub fn bad_request(message: &str) -> Response {
