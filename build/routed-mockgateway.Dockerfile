@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 # routed-mockgateway image (tests only): multi-stage, release build, distroless runtime.
-FROM docker.io/library/rust:1.92-bookworm AS build
+FROM docker.io/library/rust:1.97-bookworm AS build
 WORKDIR /src
 ARG COMMIT=unknown
 ENV ROUTED_COMMIT=${COMMIT} CARGO_TERM_COLOR=always

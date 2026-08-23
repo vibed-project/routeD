@@ -2,7 +2,7 @@
 # Local development toolchain image for routeD.
 # The official rust image ships the "minimal" rustup profile (no clippy/rustfmt);
 # this layer adds them plus cargo-deny so `make lint deny` works without a host toolchain.
-FROM docker.io/library/rust:1.92-bookworm
+FROM docker.io/library/rust:1.97-bookworm
 ARG CARGO_DENY_VERSION=0.20.2
 ARG CARGO_CYCLONEDX_VERSION=0.5.7
 ARG TARGETARCH
