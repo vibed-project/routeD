@@ -113,6 +113,9 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+        {{- with .Values.extraContainers }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       volumes:
         {{- if .Values.feedback.enabled }}
         - name: feedback
@@ -128,6 +131,9 @@ spec:
         - name: resources
           configMap:
             name: {{ default (printf "%s-resources" (include "routed.fullname" .)) .Values.routing.existingConfigMap }}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

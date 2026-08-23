@@ -80,6 +80,12 @@ affinity: {}
 # Extra environment variables for the router container.
 extraEnv: []
 
+# Extra containers (sidecars) and volumes for the router pod, appended
+# verbatim. Sidecars commonly share the feedback volume (log shippers,
+# exporters) or add their own.
+extraContainers: []
+extraVolumes: []
+
 operator:
   # The operator reconciles routed.io CRDs into routing snapshots and
   # distributes them to routed over gRPC, with a ConfigMap fallback
