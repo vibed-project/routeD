@@ -34,6 +34,11 @@ pub struct Cli {
         default_value = "0.0.0.0:9090"
     )]
     pub snapshot_grpc_addr: String,
+    /// Directory with `tls.crt`/`tls.key`/`ca.crt` enabling mutual TLS on
+    /// the snapshot gRPC service (ADR-0021): clients must present a
+    /// certificate signed by `ca.crt`. Unset serves plain TCP.
+    #[arg(long, env = "ROUTED_SNAPSHOT_TLS_DIR")]
+    pub snapshot_tls_dir: Option<std::path::PathBuf>,
     /// Enable leader election (required when running more than one replica).
     #[arg(long, env = "ROUTED_LEADER_ELECT", default_value_t = false)]
     pub leader_elect: bool,
@@ -114,7 +119,12 @@ async fn main() -> anyhow::Result<()> {
 
     let grpc_addr: std::net::SocketAddr = cli.snapshot_grpc_addr.parse()?;
     let grpc_service = grpc::Service::new(snapshot_rx);
-    let grpc_server = tonic::transport::Server::builder()
+    let mut grpc_builder = tonic::transport::Server::builder();
+    if let Some(dir) = &cli.snapshot_tls_dir {
+        tracing::info!(dir = %dir.display(), "snapshot gRPC requires mutual TLS");
+        grpc_builder = grpc_builder.tls_config(routed_proto::tls::server_mtls(dir)?)?;
+    }
+    let grpc_server = grpc_builder
         .add_service(
             routed_proto::snapshot_service_server::SnapshotServiceServer::new(grpc_service),
         )

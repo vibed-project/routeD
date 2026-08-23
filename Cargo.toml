@@ -63,7 +63,7 @@ prometheus-client = "0.25"
 rustls = { version = "0.23", default-features = false, features = ["ring", "logging", "std", "tls12"] }
 tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "logging", "tls12"] }
 prost = "0.14"
-tonic = { version = "0.14", default-features = false, features = ["router", "server", "channel", "codegen"] }
+tonic = { version = "0.14", default-features = false, features = ["router", "server", "channel", "codegen", "tls-ring"] }
 tonic-prost = "0.14"
 tonic-prost-build = "0.14"
 protox = "0.9"

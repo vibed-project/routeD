@@ -50,6 +50,14 @@ pub struct ServeArgs {
     /// `--snapshot-path` when unset.
     #[arg(long, env = "ROUTED_SNAPSHOT_ADDR")]
     pub snapshot_addr: Option<String>,
+    /// Directory with `tls.crt`/`tls.key`/`ca.crt` enabling mutual TLS to
+    /// the operator's `SnapshotService` (ADR-0021). Unset dials plain TCP.
+    #[arg(long, env = "ROUTED_SNAPSHOT_TLS_DIR")]
+    pub snapshot_tls_dir: Option<PathBuf>,
+    /// Server name checked against the operator certificate when it differs
+    /// from the dial address.
+    #[arg(long, env = "ROUTED_SNAPSHOT_TLS_DOMAIN")]
+    pub snapshot_tls_domain: Option<String>,
     /// Path to a compiled snapshot JSON file (the operator's fallback
     /// `ConfigMap`, mounted as a volume; ADR-0014). Used when
     /// `--snapshot-addr` is unset; takes precedence over `--resources`.

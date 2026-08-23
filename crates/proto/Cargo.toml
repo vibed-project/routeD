@@ -12,6 +12,7 @@ description = "Generated gRPC types for SnapshotService (ADR-0014); transport fo
 prost.workspace = true
 tonic.workspace = true
 tonic-prost.workspace = true
+thiserror.workspace = true
 
 [build-dependencies]
 tonic-prost-build.workspace = true
@@ -19,3 +20,8 @@ protox.workspace = true
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+rcgen = "0.13"
+tokio.workspace = true
+tokio-stream = { workspace = true, features = ["net"] }

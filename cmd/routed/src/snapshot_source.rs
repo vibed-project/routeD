@@ -138,13 +138,16 @@ impl CompiledFileSource {
 /// stream error or end; never gives up.
 pub struct GrpcSource {
     addr: String,
+    tls: Option<tonic::transport::ClientTlsConfig>,
 }
 
 impl GrpcSource {
     /// New source connecting to `addr` (e.g. `http://routed-operator:9090`).
+    /// With `tls` set the connection is mutual TLS (ADR-0021); the address
+    /// scheme should then be `https://`.
     #[must_use]
-    pub fn new(addr: String) -> Self {
-        Self { addr }
+    pub fn new(addr: String, tls: Option<tonic::transport::ClientTlsConfig>) -> Self {
+        Self { addr, tls }
     }
 
     /// Connect and stream updates into `holder` until the process exits.
@@ -160,10 +163,13 @@ impl GrpcSource {
     async fn watch_once(&self, holder: &Arc<SnapshotHolder>) -> anyhow::Result<()> {
         use futures_util::StreamExt as _;
 
-        let mut client = routed_proto::snapshot_service_client::SnapshotServiceClient::connect(
-            self.addr.clone(),
-        )
-        .await?;
+        let mut endpoint = tonic::transport::Channel::from_shared(self.addr.clone())?;
+        if let Some(tls) = &self.tls {
+            endpoint = endpoint.tls_config(tls.clone())?;
+        }
+        let mut client = routed_proto::snapshot_service_client::SnapshotServiceClient::new(
+            endpoint.connect().await?,
+        );
         let mut stream = client
             .watch(routed_proto::WatchRequest {
                 client: "routed".to_owned(),
