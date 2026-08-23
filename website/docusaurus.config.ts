@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'routeD',
   tagline: 'A Kubernetes-native semantic router for AI models',
-  favicon: 'img/favicon.svg',
+  favicon: 'img/favicon.png',
 
   // GitHub Pages project site. This works with no DNS setup.
   //
@@ -54,6 +54,7 @@ const config: Config = {
   ],
 
   themeConfig: {
+    image: 'img/social-card.png',
     colorMode: {
       defaultMode: 'light',
       respectPrefersColorScheme: true,
@@ -62,7 +63,7 @@ const config: Config = {
       title: 'routeD',
       logo: {
         alt: 'routeD logo',
-        src: 'img/favicon.svg',
+        src: 'img/routed-logo.png',
       },
       items: [
         {
