@@ -32,7 +32,7 @@ arc-swap = "1"
 sha2 = "0.11"
 hex = "0.4"
 ulid = "3"
-rand = "0.9"
+rand = "0.10"
 regex = "1"
 strum = { version = "0.28", features = ["derive"] }
 proptest = "1"
