@@ -2796,7 +2796,7 @@ dependencies = [
 
 [[package]]
 name = "routed"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "axum",
@@ -2821,7 +2821,7 @@ dependencies = [
 
 [[package]]
 name = "routed-api"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "k8s-openapi",
  "kube",
@@ -2832,7 +2832,7 @@ dependencies = [
 
 [[package]]
 name = "routed-artifact"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "hex",
  "serde_json",
@@ -2844,7 +2844,7 @@ dependencies = [
 
 [[package]]
 name = "routed-cache"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "routed-embed",
  "serde",
@@ -2853,7 +2853,7 @@ dependencies = [
 
 [[package]]
 name = "routed-classify"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "criterion",
  "ort",
@@ -2873,7 +2873,7 @@ dependencies = [
 
 [[package]]
 name = "routed-decision"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "criterion",
  "proptest",
@@ -2886,7 +2886,7 @@ dependencies = [
 
 [[package]]
 name = "routed-embed"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde",
  "thiserror",
@@ -2894,7 +2894,7 @@ dependencies = [
 
 [[package]]
 name = "routed-feedback"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "routed-decision",
  "routed-snapshot",
@@ -2906,7 +2906,7 @@ dependencies = [
 
 [[package]]
 name = "routed-ingress-extproc"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "axum",
@@ -2930,7 +2930,7 @@ dependencies = [
 
 [[package]]
 name = "routed-ingress-inline"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "axum",
@@ -2969,7 +2969,7 @@ dependencies = [
 
 [[package]]
 name = "routed-mockgateway"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "axum",
@@ -2987,7 +2987,7 @@ dependencies = [
 
 [[package]]
 name = "routed-operator"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "axum",
@@ -3018,7 +3018,7 @@ dependencies = [
 
 [[package]]
 name = "routed-policy"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "routed-api",
  "routed-snapshot",
@@ -3030,7 +3030,7 @@ dependencies = [
 
 [[package]]
 name = "routed-proto"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "prost",
  "protox",
@@ -3045,7 +3045,7 @@ dependencies = [
 
 [[package]]
 name = "routed-router"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "routed-cache",
  "routed-classify",
@@ -3062,7 +3062,7 @@ dependencies = [
 
 [[package]]
 name = "routed-security"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "regex",
  "routed-decision",
@@ -3073,7 +3073,7 @@ dependencies = [
 
 [[package]]
 name = "routed-snapshot"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "arc-swap",
  "hex",
@@ -3086,7 +3086,7 @@ dependencies = [
 
 [[package]]
 name = "routed-telemetry"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "hex",
@@ -3104,11 +3104,11 @@ dependencies = [
 
 [[package]]
 name = "routed-version"
-version = "0.1.1"
+version = "0.1.2"
 
 [[package]]
 name = "routedctl"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "clap",

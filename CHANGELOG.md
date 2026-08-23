@@ -8,6 +8,21 @@ minor versions may still break APIs.
 
 Nothing yet.
 
+## [0.1.2] - 2026-08-23
+
+### Added
+
+- Mutual TLS for snapshot distribution (ADR-0021): `routed-proto::tls`
+  builds server/client configs from a `tls.crt`/`tls.key`/`ca.crt`
+  directory (Kubernetes TLS-secret layout plus the peer CA). The operator
+  gains `--snapshot-tls-dir` (requires CA-signed client certificates);
+  routed gains `--snapshot-tls-dir` / `--snapshot-tls-domain`. Plain TCP
+  remains the default.
+
+### Changed
+
+- Dependency bump (docker/setup-buildx-action v4).
+
 ## [0.1.1] - 2026-08-23
 
 ### Added
